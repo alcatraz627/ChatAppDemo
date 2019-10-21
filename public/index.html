@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Socket.IO chat</title>
+	<link rel="stylesheet" href="bulma.min.css">
+	<style>
+		.container {
+			padding: 20px;
+		}
+
+		.messageContainer {
+			border: 1px dotted transparent;
+			height: 70vh;
+			/* background: blue; */
+		}
+		#messages {
+			margin: 15px;
+			background: white;
+			height: calc(100% - 30px);
+		}
+
+		#messages>li:nth-child(odd) {
+			background-color: #3331;
+		}
+
+		.sender {
+			padding-top: 40px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h3 class="title">ChatApp demo</h3>
+		<div class="subtitle">Send messages to the group</div>
+		<div class="messageContainer has-background-info">
+			<ul id="messages"></ul>
+		</div>
+		<form>
+			<div class="field has-addons sender">
+
+				<div class="control is-expanded">
+					<input id="m" autocomplete="off" class="input" placeholder="Enter Message" />
+				</div>
+				<div class="control">
+					<button class="button is-primary">Send</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+	$(function() {
+		var socket = io();
+		$('form').submit(function(e) {
+			e.preventDefault()
+			socket.emit('chat message', $('#m').val())
+			$('#m').val('')
+			return false
+		})
+
+		socket.on('chat message', msg => {$('#messages').append($('<li>').text(msg))})
+	})
+</script>
+</html>
