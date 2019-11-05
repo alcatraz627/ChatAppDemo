@@ -7,8 +7,10 @@ To run,
 1. Open browser at `localhost:3000`
 
 ### TODO
-- [ ] Move FrontEnd to React
-- [ ] Add ability to assign self a username and have that prepended to messages
+- [x] Move FrontEnd to React
+- [x] Add ability to assign self a username and have that prepended to messages
 - [ ] Directly message a user
 - [ ] See who's online
 - [ ] Maintain server logs of all the conversations
+- [ ] Detect links and hyperlink
+- [ ] Embed previews

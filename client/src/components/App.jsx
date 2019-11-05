@@ -6,6 +6,8 @@ import { Grommet, Box, Button, Heading, Grid, TextInput } from 'grommet'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import ChatArea from './ChatArea'
+import Login from './Login'
+
 import { Notification } from 'grommet-icons'
 
 const theme = {
@@ -32,18 +34,17 @@ const theme = {
 
 const ENDPOINT = 'localhost:3000'
 
-const USER = 'alcatraz627'
-
-const generateMessage = ({ user, message }) => ({ user, message })
+const generateMessage = ({ user, message, isinfo = false }) => ({ user, message, isinfo })
 
 const App = () => {
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState("");
 
+    const [username, setUsername] = useState(undefined);
+
     const socket = socketIOClient(ENDPOINT)
 
     const handleMessageAdd = (data) => {
-        console.log(data)
         setMessages(messages => [...messages, generateMessage({ ...data })])
     }
 
@@ -53,14 +54,29 @@ const App = () => {
 
     const handleMessageSend = e => {
         e.preventDefault()
-        socket.emit("chat message", { message: messageInput, user: USER })
+        socket.emit("chat message", { message: messageInput, user: username })
         setMessageInput("")
     }
 
-    useEffect(() => {
-        socket.on("chat message", data => handleMessageAdd(data))
-    }, [])
+    const handleSetUsername = username => { setUsername(username) }
 
+    useEffect(() => {
+        // socket.on("connect", () => {
+        if (username) socket.emit("new", { user: username })
+        // })
+    }, [username])
+
+    useEffect(() => {
+        socket.on("chat message", data => {
+            if (!username) handleMessageAdd(data)
+        })
+
+        socket.on("new", user => {
+            console.log("New user: ", user)
+            handleMessageAdd({ user, isinfo: true })
+        })
+
+    }, [])
 
     return (
         <div>
@@ -75,16 +91,22 @@ const App = () => {
 
                     <Navbar gridArea="header" />
                     <Sidebar gridArea="sidebar" />
-                    <ChatArea gridArea="chat" messages={messages} />
-                    <Box gridArea="input">
-                        <form onSubmit={handleMessageSend}>
-                            <TextInput placeholder="Enter message here" value={messageInput} name="messageInput" onChange={handleInputChange} />
-                        </form>
-                    </Box>
+                    {username ?
+                        <>
+                            <ChatArea gridArea="chat" messages={messages} username={username} />
+                            <Box gridArea="input">
+                                <form onSubmit={handleMessageSend}>
+                                    <TextInput placeholder="Enter message here" value={messageInput} name="messageInput" onChange={handleInputChange} />
+                                </form>
+                            </Box>
+                        </>
+                        : <Login gridArea="chat" handleSetUsername={handleSetUsername} />
+                    }
                 </Grid>
             </Grommet>
         </div>
     )
 }
+
 
 export default App
